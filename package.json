@@ -1,0 +1,27 @@
+{
+  "name": "backend-initiative-project",
+  "version": "1.0.0",
+  "description": "This is a base repository for the backend initiative project",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LolaOmolambe/Backend-Initiative-Project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LolaOmolambe/Backend-Initiative-Project/issues"
+  },
+  "homepage": "https://github.com/LolaOmolambe/Backend-Initiative-Project#readme"
+}
