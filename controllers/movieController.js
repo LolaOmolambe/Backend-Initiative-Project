@@ -1,6 +1,6 @@
 const fs = require("fs");
 const moviesData = JSON.parse(
-    fs.readFileSync(`${__dirname}/../data/movies.js`)
+  fs.readFileSync(`${__dirname}/../data/movies.js`)
 );
 const uuid = require("uuid");
 
@@ -44,24 +44,27 @@ exports.createMovie = (req, res, next) => {
       title: req.body.title,
       genre: req.body.genre,
       id: uuid.v4(),
-      status: "active"
+      status: "active",
+      price: req.body.price
     };
 
-    if (!newMovie.title || !newMovie.genre) {
+    if (!newMovie.title || !newMovie.genre || !newMovie.price) {
       return res.status(400).json({
-        message: "Please include title and genre",
+        message: "Please include title , genre and price",
       });
     }
     moviesData.push(newMovie);
 
-    fs.writeFileSync(`${__dirname}/../data/movies.js`, JSON.stringify(moviesData));
+    fs.writeFileSync(
+      `${__dirname}/../data/movies.js`,
+      JSON.stringify(moviesData)
+    );
 
     res.status(201).json({
       status: "Success",
       data: newMovie,
     });
   } catch (err) {
-      console.log(err)
     res.status(500).json({
       message: "Oops, Something went wrong",
     });
@@ -77,8 +80,12 @@ exports.updateMovie = (req, res, next) => {
         if (movie.id === req.params.id) {
           movie.title = data.title ? data.title : movie.title;
           movie.genre = data.genre ? data.genre : movie.genre;
-          
-          fs.writeFileSync(`${__dirname}/../data/movies.js`, JSON.stringify(moviesData));
+          movie.price = data.price ? data.price : movie.price;
+
+          fs.writeFileSync(
+            `${__dirname}/../data/movies.js`,
+            JSON.stringify(moviesData)
+          );
           return res.status(200).json({
             status: "Success",
             data: movie,
@@ -103,12 +110,15 @@ exports.deleteMovie = (req, res, next) => {
     let movie = moviesData.find((movie) => movie.id === req.params.id);
 
     if (movie) {
-        let result = moviesData.filter(movie => movie.id !== req.params.id);
-        fs.writeFileSync(`${__dirname}/../data/movies.js`, JSON.stringify(result));
-        return res.status(200).json({
-            status: "Success",
-            data: null,
-          });
+      let result = moviesData.filter((movie) => movie.id !== req.params.id);
+      fs.writeFileSync(
+        `${__dirname}/../data/movies.js`,
+        JSON.stringify(result)
+      );
+      return res.status(200).json({
+        status: "Success",
+        data: null,
+      });
     } else {
       res.status(404).json({
         message: `Movie with id ${req.params.id} does not exist`,
