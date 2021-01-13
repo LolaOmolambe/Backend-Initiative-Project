@@ -1,14 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const moviesController = require("../controllers/movieController");
+const schemas = require("../helpers/schemas");
+const middleware = require("../helpers/middleware");
 
 router
   .route("/")
   .get(moviesController.getAllMovies)
-  .post(moviesController.createMovie);
+  .post(middleware(schemas.movieModel), moviesController.createMovie);
 
 router
-  .route('/:id')
+  .route("/:id")
   .get(moviesController.getMovie)
   .put(moviesController.updateMovie)
   .delete(moviesController.deleteMovie);
