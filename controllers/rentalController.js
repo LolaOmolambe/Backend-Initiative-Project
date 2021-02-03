@@ -12,13 +12,7 @@ exports.createBooking = async (req, res, next) => {
         data: [],
       });
     }
-    let user = await User.findById(req.body.userId);
-    if (!user) {
-      return res.status(404).json({
-        message: `User with id ${req.body.userId} does not exist`,
-        data: [],
-      });
-    }
+    let user = req.user;
     let newBooking = await Booking.create({
       _userId: user._id,
       _movieId: movie.id,
@@ -38,7 +32,7 @@ exports.createBooking = async (req, res, next) => {
   }
 };
 
-exports.getAllBookings = repo.getAll(Booking);
+exports.getAllUsersBookings = repo.getAll(Booking);
 
 exports.getBooking = repo.getOne(Booking);
 

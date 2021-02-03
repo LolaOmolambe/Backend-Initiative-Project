@@ -1,14 +1,16 @@
 const express = require("express");
-const moviesRoutes = require("./routes/moviesRoutes");
-const userRoutes = require("./routes/userRoutes");
-const rentalRoutes = require("./routes/rentalRoutes");
+
+const routes = require("./routes/indexRoutes");
+const passport = require('passport');
+require('./helpers/passport');
 
 const app = express();
 
 app.use(express.json());
 
-app.use("/api/movies", moviesRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/rentals", rentalRoutes);
+app.use(passport.initialize());
+app.use(passport.session()); 
+
+app.use("/api", routes);
 
 module.exports = app;

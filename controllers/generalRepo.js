@@ -8,7 +8,7 @@ exports.createOne = (Model) => async (req, res, next) => {
     // }
 
     res.status(200).json({
-      status: "Success",
+      status: "success",
       data: {
         result,
       },
@@ -16,7 +16,7 @@ exports.createOne = (Model) => async (req, res, next) => {
     return result;
   } catch (err) {
     res.status(500).json({
-      status: "Error",
+      status: "error",
       message: "Oops, Something went wrong",
     });
   }
@@ -24,16 +24,16 @@ exports.createOne = (Model) => async (req, res, next) => {
 
 exports.getAll = (Model) => async (req, res, next) => {
   try {
-    const result = await Model.find();
-    res.status(200).json({
-      status: "Success",
+    const result = await Model.find({ _userId: req.user._id });
+    return res.status(200).json({
+      status: "success",
       data: {
         result,
       },
     });
   } catch (err) {
     res.status(500).json({
-      status: "Error",
+      status: "error",
       message: "Oops, Something went wrong",
     });
   }
@@ -41,23 +41,27 @@ exports.getAll = (Model) => async (req, res, next) => {
 
 exports.getOne = (Model) => async (req, res, next) => {
   try {
-    let result = await Model.findById(req.params.id);
+    let result = await Model.find({
+      _id: req.params.id,
+      _userId: req.user._id,
+    });
 
     if (!result) {
-      res.status(404).json({
-        status: "Error",
+      return res.status(404).json({
+        status: "error",
         message: `No document exists with this ID ${req.params.id}`,
       });
     }
     res.status(200).json({
-      status: "Success",
+      status: "success",
       data: {
         result,
       },
     });
   } catch (err) {
+    console.log("err ", err);
     res.status(500).json({
-      status: "Error",
+      status: "error",
       message: "Oops, Something went wrong",
     });
   }
@@ -65,27 +69,34 @@ exports.getOne = (Model) => async (req, res, next) => {
 
 exports.updateOne = (Model) => async (req, res, next) => {
   try {
-    let result = await Model.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
+    let result = await Model.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        _userId: req.user._id,
+      },
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+      
     if (!result) {
       //throw error
-      res.status(404).json({
-        status: "Error",
-        message: `No document exists with this ID ${req.params.id}`,
+      return res.status(404).json({
+        status: "error",
+        message: `No document exists with this ID ${req.params.id} for ${req.user.name}`,
       });
     }
     res.status(200).json({
-      status: "Success",
+      status: "success",
       data: {
         result,
       },
     });
   } catch (err) {
     res.status(500).json({
-      status: "Error",
+      status: "error",
       message: "Oops, Something went wrong",
     });
   }
@@ -93,22 +104,30 @@ exports.updateOne = (Model) => async (req, res, next) => {
 
 exports.deleteOne = (Model) => async (req, res, next) => {
   try {
-    let result = await Model.findByIdAndUpdate(req.params.id, {
-      isDeleted: true,
-    });
+    let result = await Model.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        _userId: req.user._id,
+      },
+      {
+        isDeleted: true,
+      }
+    );
+    console.log("resu;t ", result)
     if (!result) {
-      res.status(404).json({
+      return res.status(404).json({
         status: "Error",
         message: `No document exists with this ID ${req.params.id}`,
       });
     }
     res.status(200).json({
-      status: "Success",
+      status: "success",
       data: null,
     });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
-      status: "Error",
+      status: "error",
       message: "Oops, Something went wrong",
     });
   }
