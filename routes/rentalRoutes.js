@@ -5,14 +5,16 @@ const schemas = require("../helpers/schemas");
 const middleware = require("../helpers/middleware");
 const authController = require("../controllers/authController");
 
+router.use(authController.protectRoutes);
+
 router
   .route("/")
-  .post(middleware(schemas.bookingModel),authController.protectRoutes, rentalController.createBooking)
-  .get(authController.protectRoutes, rentalController.getAllUsersBookings);
+  .post(middleware(schemas.bookingModel),rentalController.createBooking)
+  .get(rentalController.getAllUsersBookings);
 
 router
   .route("/:id")
-  .get(authController.protectRoutes, rentalController.getBooking)
-  .put(authController.protectRoutes, rentalController.updateBooking)
-  .delete(authController.protectRoutes, rentalController.deleteBooking);
+  .get(rentalController.getBooking)
+  .put(rentalController.updateBooking)
+  .delete(rentalController.deleteBooking);
 module.exports = router;

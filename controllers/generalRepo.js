@@ -24,7 +24,13 @@ exports.createOne = (Model) => async (req, res, next) => {
 
 exports.getAll = (Model) => async (req, res, next) => {
   try {
-    const result = await Model.find({ _userId: req.user._id });
+    let result;
+    if (Model.collection.collectionName == "bookings") {
+      result = await Model.find({ _userId: req.user._id });
+    } else {
+      result = await Model.find({});
+    }
+
     return res.status(200).json({
       status: "success",
       data: {
@@ -41,10 +47,17 @@ exports.getAll = (Model) => async (req, res, next) => {
 
 exports.getOne = (Model) => async (req, res, next) => {
   try {
-    let result = await Model.find({
-      _id: req.params.id,
-      _userId: req.user._id,
-    });
+    let result;
+    if (Model.collection.collectionName == "bookings") {
+      result = await Model.find({
+        _id: req.params.id,
+        _userId: req.user._id,
+      });
+    } else {
+      result = await Model.find({
+        _id: req.params.id,
+      });
+    }
 
     if (!result) {
       return res.status(404).json({
@@ -69,18 +82,32 @@ exports.getOne = (Model) => async (req, res, next) => {
 
 exports.updateOne = (Model) => async (req, res, next) => {
   try {
-    let result = await Model.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        _userId: req.user._id,
-      },
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-      
+    let result;
+    if (Model.collection.collectionName == "bookings") {
+      result = await Model.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          _userId: req.user._id,
+        },
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+    } else {
+      result = await Model.findOneAndUpdate(
+        {
+          _id: req.params.id,
+        },
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+    }
+
     if (!result) {
       //throw error
       return res.status(404).json({
@@ -104,16 +131,29 @@ exports.updateOne = (Model) => async (req, res, next) => {
 
 exports.deleteOne = (Model) => async (req, res, next) => {
   try {
-    let result = await Model.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        _userId: req.user._id,
-      },
-      {
-        isDeleted: true,
-      }
-    );
-    console.log("resu;t ", result)
+    let result;
+
+    if (Model.collection.collectionName == "bookings") {
+      result = await Model.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          _userId: req.user._id,
+        },
+        {
+          isDeleted: true,
+        }
+      );
+    } else {
+      result = await Model.findOneAndUpdate(
+        {
+          _id: req.params.id,
+        },
+        {
+          isDeleted: true,
+        }
+      );
+    }
+
     if (!result) {
       return res.status(404).json({
         status: "Error",
@@ -125,7 +165,6 @@ exports.deleteOne = (Model) => async (req, res, next) => {
       data: null,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       status: "error",
       message: "Oops, Something went wrong",

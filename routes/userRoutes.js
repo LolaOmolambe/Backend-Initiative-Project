@@ -6,11 +6,12 @@ const middleware = require("../helpers/middleware");
 const authController = require("../controllers/authController");
 
 //router.route("/").get(userController.getAllUsers);
+router.use(authController.protectRoutes);
 
 router
   .route("/me")
-  .get(authController.protectRoutes, userController.getUser)
-  .put(authController.protectRoutes, userController.updateUser)
-  .delete(authController.protectRoutes, userController.deleteUser);
+  .get(userController.getUser)
+  .put(userController.updateUser)
+  .delete(userController.deleteUser);
 
 module.exports = router;

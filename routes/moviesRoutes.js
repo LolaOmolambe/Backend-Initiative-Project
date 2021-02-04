@@ -5,9 +5,11 @@ const authController = require("../controllers/authController");
 const schemas = require("../helpers/schemas");
 const middleware = require("../helpers/middleware");
 
+router.use(authController.protectRoutes);
+
 router
   .route("/")
-  .get(authController.protectRoutes, moviesController.getAllMovies)
+  .get(moviesController.getAllMovies)
   .post(middleware(schemas.movieModel), moviesController.createMovie);
 
 router

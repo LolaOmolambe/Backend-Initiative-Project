@@ -95,7 +95,7 @@ exports.protectRoutes = async (req, res, next) => {
     if (!token) {
       return res.status(400).json({
         status: "error",
-        message: "No token provided. Please login",
+        message: "You are not authenticated. Please login",
         data: null,
       });
     }
@@ -115,3 +115,11 @@ exports.protectRoutes = async (req, res, next) => {
     next();
   } catch (err) {}
 };
+
+exports.forgotPassword = async (req, res, next) => {
+  try{
+
+  } catch(err){
+    next(err);
+  }
+}
