@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const assignToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -7,7 +8,21 @@ const assignToken = (userId) => {
   });
 };
 
-exports.loginResponse = (user, res) => {
+const loginResponse = (user, res) => {
+  let token = assignToken(user._id);
+
+  user.password = "";
+
+  res.status(200).json({
+    status: "success",
+    token,
+    data: {
+      user,
+    },
+  });
+};
+
+exports.googleResponse = (user, res) => {
   let token = assignToken(user._id);
 
   user.password = "";
@@ -61,7 +76,7 @@ exports.signup = async (req, res, next) => {
   try {
     let { password, confirmPassword } = req.body;
     if (password != confirmPassword) {
-      res.status(400).json({
+      return res.status(400).json({
         status: "error",
         message: "Password mismatch",
         data: null,
@@ -117,9 +132,91 @@ exports.protectRoutes = async (req, res, next) => {
 };
 
 exports.forgotPassword = async (req, res, next) => {
-  try{
+  try {
+    //Find the User
+    let user = await User.findOne({ email: req.body.email });
 
-  } catch(err){
-    next(err);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "No user with this email address",
+        data: null,
+      });
+    }
+
+    //Generate the reset token
+    let resetToken = user.createPasswordToken();
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: "success",
+      message: "Token generated successfully",
+      data: {
+        resetToken,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Oops, Something went wrong",
+      error: err,
+    });
   }
-}
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    let {token, password, confirmPassword } = req.body;
+
+    if(!token) {
+      return res.status(404).json({
+        status: "error",
+        message: "Token is empty",
+        data: null,
+      });
+    }
+    let hashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    let user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "Token is invalid or has expired. Initiate Forgot password again",
+        data: null,
+      });
+    }
+
+    if (password != confirmPassword) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password mismatch",
+        data: null,
+      });
+    }
+
+    user.password = password;
+    user.confirmPassword = confirmPassword;
+    user.passwordResetExpires = undefined;
+    user.passwordResetToken = undefined;
+
+    await user.save();
+
+    //Allow login
+    loginResponse(user, res);
+
+  } catch (err) {
+    
+    res.status(500).json({
+      status: "error",
+      message: "Oops, Something went wrong",
+      error: err,
+    });
+  }
+};

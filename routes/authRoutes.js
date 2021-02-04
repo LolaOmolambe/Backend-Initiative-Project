@@ -12,6 +12,9 @@ router.post(
 );
 router.post("/login", authControllers.login);
 
+router.post("/forgotpassword", authControllers.forgotPassword);
+router.post("/resetPassword", authControllers.resetPassword);
+
 router.get(
   "/googlelogin",
   passport.authenticate("google", {
@@ -26,8 +29,9 @@ router.get(
     failureRedirect: `https://localhost:4000/api/auth/login`,
   }),
   (req, res) => {
-    authControllers.loginResponse(req.user, res);
+    authControllers.googleResponse(req.user, res);
   }
 );
+
 
 module.exports = router;
