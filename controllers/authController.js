@@ -96,41 +96,6 @@ exports.signup = async (req, res, next) => {
   }
 };
 
-exports.protectRoutes = async (req, res, next) => {
-  try {
-    let token;
-
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
-    }
-
-    if (!token) {
-      return res.status(400).json({
-        status: "error",
-        message: "You are not authenticated. Please login",
-        data: null,
-      });
-    }
-
-    let decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
-
-    const user = await User.findById(decodedToken.userId);
-
-    if (!user) {
-      return res.status(401).json({
-        status: "error",
-        message: "User does not exist",
-        data: null,
-      });
-    }
-    req.user = user;
-    next();
-  } catch (err) {}
-};
-
 exports.forgotPassword = async (req, res, next) => {
   try {
     //Find the User
@@ -166,19 +131,16 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   try {
-    let {token, password, confirmPassword } = req.body;
+    let { token, password, confirmPassword } = req.body;
 
-    if(!token) {
+    if (!token) {
       return res.status(404).json({
         status: "error",
         message: "Token is empty",
         data: null,
       });
     }
-    let hashedToken = crypto
-      .createHash("sha256")
-      .update(token)
-      .digest("hex");
+    let hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     let user = await User.findOne({
       passwordResetToken: hashedToken,
@@ -188,7 +150,8 @@ exports.resetPassword = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({
         status: "error",
-        message: "Token is invalid or has expired. Initiate Forgot password again",
+        message:
+          "Token is invalid or has expired. Initiate Forgot password again",
         data: null,
       });
     }
@@ -210,13 +173,67 @@ exports.resetPassword = async (req, res, next) => {
 
     //Allow login
     loginResponse(user, res);
-
   } catch (err) {
-    
     res.status(500).json({
       status: "error",
       message: "Oops, Something went wrong",
       error: err,
     });
   }
+};
+
+//MiddleWares
+exports.protectRoutes = async (req, res, next) => {
+  try {
+    let token;
+
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return res.status(400).json({
+        status: "error",
+        message: "You are not authenticated. Please login",
+        data: null,
+      });
+    }
+
+    let decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decodedToken.userId);
+
+    if (!user) {
+      return res.status(401).json({
+        status: "error",
+        message: "User does not exist",
+        data: null,
+      });
+    }
+    req.user = user;
+    next();
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Oops, Something went wrong",
+      error: err,
+    });
+  }
+};
+
+
+exports.rolesAllowed = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        status: "error",
+        message: "You are not authorized to access this route",
+        data: null,
+      });
+    }
+    next();
+  };
 };

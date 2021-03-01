@@ -8,12 +8,17 @@ const movieSchema = new mongoose.Schema(
     },
     genre: {
       type: String,
+      enum: ["Action", "Comedy", "Drama", "Fantasy", "Horror", "Mystery", "Romance", "Thriller"],
       required: true,
     },
     price: {
       type: Number,
       required: true,
       min: 100
+    },
+    imageUrl: {
+      type: String,
+      required: true
     },
     isDeleted: {
       type: Boolean,

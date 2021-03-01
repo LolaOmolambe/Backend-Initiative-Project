@@ -5,7 +5,6 @@ exports.getAllUsers = repo.getAll(User);
 
 exports.getUser = async (req, res, next) => {
   try {
-
     let user = await User.findById(req.user._id);
 
     res.status(200).json({
@@ -14,22 +13,30 @@ exports.getUser = async (req, res, next) => {
         user,
       },
     });
-
   } catch (err) {
-    console.log("error ", err)
     res.status(500).json({
       status: "error",
       message: "Oops, Something went wrong",
+      data: err
     });
   }
 };
 exports.updateUser = async (req, res, next) => {
   try {
-    let user = await User.findByIdAndUpdate(req.user._id, req.body, {
+    //Only allow some fields get updated
+    let allowedBody = {
+      name: req.body.name,
+    };
+
+    if (req.file) {
+      allowedBody.profilePicture = req.file.location;
+    }
+    
+    let user = await User.findByIdAndUpdate(req.user._id, allowedBody, {
       new: true,
       runValidators: true,
     });
-    if(!user){
+    if (!user) {
       return res.status(404).json({
         status: "error",
         message: `User does not exist`,
@@ -46,6 +53,7 @@ exports.updateUser = async (req, res, next) => {
     res.status(500).json({
       status: "error",
       message: "Oops, Something went wrong",
+      data: err
     });
   }
 };

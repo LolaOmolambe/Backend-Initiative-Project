@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    profilePicture: {
+      type: String,
+      default: 'default.jpg'
+    },
     isDeleted: {
       type: Boolean,
       default: false,
