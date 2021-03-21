@@ -2,15 +2,17 @@ const repo = require("./generalRepo");
 const Booking = require("../models/bookingModel");
 const Movie = require("../models/movieModel");
 const User = require("../models/userModel");
+const { successResponse } = require("../helpers/response");
+const AppError = require("../helpers/appError");
 
 exports.createBooking = async (req, res, next) => {
   try {
     let movie = await Movie.findById(req.body.movieId);
+
     if (!movie) {
-      return res.status(404).json({
-        message: `Movie with id ${req.body.movieId} does not exist`,
-        data: [],
-      });
+      return next(
+        new AppError(`Movie with id ${req.body.movieId} does not exist`, 404)
+      );
     }
     let user = req.user;
     let newBooking = await Booking.create({
@@ -20,15 +22,9 @@ exports.createBooking = async (req, res, next) => {
       paymentStatus: req.body.paymentStatus,
     });
 
-    res.status(201).json({
-      status: "Success",
-      data: newBooking,
-    });
+    return successResponse(res, 201, "Booking successfull", { newBooking });
   } catch (err) {
-    res.status(500).json({
-      message: "Oops, Something went wrong",
-      error: err
-    });
+    next(err);
   }
 };
 

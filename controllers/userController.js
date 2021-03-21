@@ -1,5 +1,7 @@
 const repo = require("./generalRepo");
 const User = require("../models/userModel");
+const { successResponse } = require("../helpers/response");
+const AppError = require("../helpers/appError");
 
 exports.getAllUsers = repo.getAll(User);
 
@@ -7,18 +9,9 @@ exports.getUser = async (req, res, next) => {
   try {
     let user = await User.findById(req.user._id);
 
-    res.status(200).json({
-      status: "success",
-      data: {
-        user,
-      },
-    });
+    return successResponse(res, 200, "User fetched successfully", { user });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-      data: err
-    });
+    next(err);
   }
 };
 exports.updateUser = async (req, res, next) => {
@@ -31,30 +24,18 @@ exports.updateUser = async (req, res, next) => {
     if (req.file) {
       allowedBody.profilePicture = req.file.location;
     }
-    
+
     let user = await User.findByIdAndUpdate(req.user._id, allowedBody, {
       new: true,
       runValidators: true,
     });
     if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: `User does not exist`,
-      });
+      return next(new AppError("User does not exist", 404));
     }
 
-    res.status(200).json({
-      status: "success",
-      data: {
-        user,
-      },
-    });
+    return successResponse(res, 200, "User updated successfully", { user });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-      data: err
-    });
+    next(err);
   }
 };
 
@@ -62,14 +43,8 @@ exports.deleteUser = async (req, res, next) => {
   try {
     await User.findByIdAndUpdate(req.user._id, { isDeleted: true });
 
-    res.status(200).json({
-      status: "success",
-      data: null,
-    });
+    return successResponse(res, 200, "User deleted successfully", null);
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-    });
+    next(err);
   }
 };

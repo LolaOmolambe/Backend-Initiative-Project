@@ -1,6 +1,8 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { successResponse } = require("../helpers/response");
+const AppError = require("../helpers/appError");
 
 const assignToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -13,27 +15,14 @@ const loginResponse = (user, res) => {
 
   user.password = "";
 
-  res.status(200).json({
-    status: "success",
-    token,
-    data: {
-      user,
-    },
-  });
+  return successResponse(res, 200, "Login Successfull", { user, token });
 };
 
 exports.googleResponse = (user, res) => {
   let token = assignToken(user._id);
 
   user.password = "";
-
-  res.status(200).json({
-    status: "success",
-    token,
-    data: {
-      user,
-    },
-  });
+  return successResponse(res, 200, "Login Successfull", { user });
 };
 
 exports.login = async (req, res, next) => {
@@ -42,11 +31,7 @@ exports.login = async (req, res, next) => {
 
     //Validation for Bad Input
     if (!email || !password) {
-      return res.status(400).json({
-        status: "error",
-        message: "Email or password is null",
-        data: null,
-      });
+      return next(new AppError("Email or password is null", 400));
     }
 
     //Find User
@@ -54,21 +39,13 @@ exports.login = async (req, res, next) => {
 
     //Check if user exists and password is correct
     if (!user || !(await user.rightPassword(password, user.password))) {
-      return res.status(401).json({
-        status: "error",
-        message: "Incorrect email or password",
-        data: null,
-      });
+      return next(new AppError("Incorrect email or password", 401));
     }
 
     //Login User
     loginResponse(user, res);
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-      error: err,
-    });
+    next(err);
   }
 };
 
@@ -76,11 +53,7 @@ exports.signup = async (req, res, next) => {
   try {
     let { password, confirmPassword } = req.body;
     if (password != confirmPassword) {
-      return res.status(400).json({
-        status: "error",
-        message: "Password mismatch",
-        data: null,
-      });
+      return next(new AppError("Password mismatch", 400));
     }
 
     let user = await User.create(req.body);
@@ -88,11 +61,7 @@ exports.signup = async (req, res, next) => {
     //Allow login
     loginResponse(user, res);
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-      error: err,
-    });
+    next(err);
   }
 };
 
@@ -102,30 +71,18 @@ exports.forgotPassword = async (req, res, next) => {
     let user = await User.findOne({ email: req.body.email });
 
     if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: "No user with this email address",
-        data: null,
-      });
+      return next(new AppError("No user with this email address", 401));
     }
 
     //Generate the reset token
     let resetToken = user.createPasswordToken();
     await user.save({ validateBeforeSave: false });
 
-    res.status(200).json({
-      status: "success",
-      message: "Token generated successfully",
-      data: {
-        resetToken,
-      },
+    return successResponse(res, 200, "Token generated successfully", {
+      resetToken,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-      error: err,
-    });
+    next(err);
   }
 };
 
@@ -134,11 +91,7 @@ exports.resetPassword = async (req, res, next) => {
     let { token, password, confirmPassword } = req.body;
 
     if (!token) {
-      return res.status(404).json({
-        status: "error",
-        message: "Token is empty",
-        data: null,
-      });
+      return next(new AppError("Token is empty", 404));
     }
     let hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
@@ -148,20 +101,16 @@ exports.resetPassword = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message:
+      return next(
+        new AppError(
           "Token is invalid or has expired. Initiate Forgot password again",
-        data: null,
-      });
+          404
+        )
+      );
     }
 
     if (password != confirmPassword) {
-      return res.status(400).json({
-        status: "error",
-        message: "Password mismatch",
-        data: null,
-      });
+      return next(new AppError("Password mismatch", 400));
     }
 
     user.password = password;
@@ -174,11 +123,7 @@ exports.resetPassword = async (req, res, next) => {
     //Allow login
     loginResponse(user, res);
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-      error: err,
-    });
+    next(err);
   }
 };
 
@@ -195,11 +140,7 @@ exports.protectRoutes = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(400).json({
-        status: "error",
-        message: "You are not authenticated. Please login",
-        data: null,
-      });
+      return next(new AppError("You are not authenticated. Please login", 401));
     }
 
     let decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
@@ -207,32 +148,21 @@ exports.protectRoutes = async (req, res, next) => {
     const user = await User.findById(decodedToken.userId);
 
     if (!user) {
-      return res.status(401).json({
-        status: "error",
-        message: "User does not exist",
-        data: null,
-      });
+      return next(new AppError("User does not exist", 401));
     }
     req.user = user;
     next();
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-      error: err,
-    });
+    next(err);
   }
 };
-
 
 exports.rolesAllowed = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        status: "error",
-        message: "You are not authorized to access this route",
-        data: null,
-      });
+      return next(
+        new AppError("You are not authorized to access this route", 403)
+      );
     }
     next();
   };

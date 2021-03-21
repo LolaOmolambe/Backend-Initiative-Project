@@ -1,3 +1,6 @@
+const { successResponse } = require("../helpers/response");
+const AppError = require("../helpers/appError");
+
 exports.createOne = (Model) => async (req, res, next) => {
   try {
     let result = await Model.create(req.body);
@@ -7,18 +10,9 @@ exports.createOne = (Model) => async (req, res, next) => {
     //   console.log("Failed");
     // }
 
-    res.status(200).json({
-      status: "success",
-      data: {
-        result,
-      },
-    });
-    return result;
+    return successResponse(res, 200, "Creation successfull", { result });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-    });
+    next(err);
   }
 };
 
@@ -31,17 +25,9 @@ exports.getAll = (Model) => async (req, res, next) => {
       result = await Model.find({});
     }
 
-    return res.status(200).json({
-      status: "success",
-      data: {
-        result,
-      },
-    });
+    return successResponse(res, 200, "Data fetched sucessfully", { result });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-    });
+    next(err);
   }
 };
 
@@ -60,23 +46,13 @@ exports.getOne = (Model) => async (req, res, next) => {
     }
 
     if (!result) {
-      return res.status(404).json({
-        status: "error",
-        message: `No document exists with this ID ${req.params.id}`,
-      });
+      return next(
+        new AppError(`No document exists with this ID ${req.params.id}`, 404)
+      );
     }
-    res.status(200).json({
-      status: "success",
-      data: {
-        result,
-      },
-    });
+    return successResponse(res, 200, "Data fetched successfully", { result });
   } catch (err) {
-    console.log("err ", err);
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-    });
+    next(err);
   }
 };
 
@@ -109,23 +85,17 @@ exports.updateOne = (Model) => async (req, res, next) => {
     }
 
     if (!result) {
-      //throw error
-      return res.status(404).json({
-        status: "error",
-        message: `No document exists with this ID ${req.params.id} for ${req.user.name}`,
-      });
+      return next(
+        new AppError(
+          `No document exists with this ID ${req.params.id} for ${req.user.name}`,
+          404
+        )
+      );
     }
-    res.status(200).json({
-      status: "success",
-      data: {
-        result,
-      },
-    });
+
+    return successResponse(res, 200, "Update successfull", { result });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-    });
+    next(err);
   }
 };
 
@@ -155,19 +125,12 @@ exports.deleteOne = (Model) => async (req, res, next) => {
     }
 
     if (!result) {
-      return res.status(404).json({
-        status: "Error",
-        message: `No document exists with this ID ${req.params.id}`,
-      });
+      return next(
+        new AppError(`No document exists with this ID ${req.params.id}`, 401)
+      );
     }
-    res.status(200).json({
-      status: "success",
-      data: null,
-    });
+    return successResponse(res, 200, "Deletion Successfull", null);
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: "Oops, Something went wrong",
-    });
+    next(err);
   }
 };
