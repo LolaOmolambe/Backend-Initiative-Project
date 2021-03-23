@@ -12,6 +12,8 @@ const schemas = {
   }),
   bookingModel: Joi.object().keys({
     movieId: Joi.string().required(),
+    email: Joi.string().required(),
+    full_name: Joi.string().required(),
   }),
   authSignUpModel: Joi.object().keys({
     name: Joi.string().required(),

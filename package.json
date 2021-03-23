@@ -20,6 +20,7 @@
     "multer-s3": "^2.9.0",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
+    "request": "^2.88.2",
     "uuid": "^8.3.2",
     "validator": "^13.5.2"
   },

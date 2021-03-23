@@ -6,11 +6,13 @@ const bookingSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true
     },
     _movieId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Movie",
       required: true,
+      index: true
     },
     price: {
       type: Number,
