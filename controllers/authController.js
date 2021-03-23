@@ -1,4 +1,5 @@
 const User = require("../models/userModel");
+const Wallet = require("../models/walletModel");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { successResponse } = require("../helpers/response");
@@ -57,6 +58,12 @@ exports.signup = async (req, res, next) => {
     }
 
     let user = await User.create(req.body);
+
+    //Create Wallet for every user
+    let wallet = await Wallet.create({
+      balance: 0,
+      user: user._id
+    });
 
     //Allow login
     loginResponse(user, res);
