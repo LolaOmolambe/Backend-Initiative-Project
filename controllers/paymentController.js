@@ -1,6 +1,5 @@
 const paystack = (request) => {
   const initializePayment = (form, callback) => {
-      console.log(process.env.PAYSTACK_SECRET_KEY);
     const options = {
       url: "https://api.paystack.co/transaction/initialize",
       headers: {
@@ -23,14 +22,13 @@ const paystack = (request) => {
         authorization: process.env.PAYSTACK_SECRET_KEY,
         "content-type": "application/json",
         "cache-control": "no-cache",
-      }
-    }
+      },
+    };
     const callbackFunc = (error, response, body) => {
-        return callback(error, body);
-    }
+      return callback(error, body);
+    };
     request(options, callbackFunc);
   };
-
 
   return { initializePayment, verifyPayment };
 };

@@ -6,6 +6,7 @@ const authController = require("../controllers/authController");
 
 router.use(authController.protectRoutes);
 router.post("/fundwallet", walletController.fundWallet);
-
+router.get("/mytransactions", walletController.getUserTransactions);
+router.get("/transactions", walletController.getAllTransactions);
 
 module.exports = router;
