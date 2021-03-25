@@ -1,18 +1,24 @@
 # Backend-Initiative-Project
 This is a base repository for the backend initiative project
 
-Level Four Task: MEDIA UPLOAD
-Congratulations once again on passing the L3 task. YOU HAVE CONTINOUSLY PROVEN TO BE A ROCKSTAR!💃🏽💃🏽💃🏽💃🏽💃🏽
+Level Five Task: PAYMENT GATEWAY (Paystack, Stripe, Flutterwave, etc)
 
-WELCOME TO LEVEL FOUR
-Your job, would be to enable media upload in your platform using external services like cloudinary, aws bucket, etc.
+Congratulations on passing the L4 task.
 
-An admin should be able to upload media (eg posters) about a movie they add to the platform.
-A user should be able to upload profile picture to their profile.
-Both endpoints should return a url for viewing/usage of the media which would be utilized by the Frontend Dev.
+YOU ARE A ROCKSTAR!💃🏽💃🏽💃🏽💃🏽💃🏽
 
-Submission: Publish the APIs with Postman and share this link too, do not forget to include the link to your level three task branch.
+WELCOME TO LEVEL FIVE
+
+Your job, this time-around is to ensure users can make payment seamlessly on your platform.
+
+Ensure a user pays for his / her movie she is willing to rent.
+Ensure you validate payment
+Create a wallet that keeps track of users balance, movie records, etc.
+Create a transaction model that also keeps track of each money flow into the system i.e referencing the user, movie, payment, etc.
+You may decide to add any other relevant feature and also integrating all payment gateway😜
+
+Submission: Publish the APIs with Postman and share this link too, do not forget to include the link to your level five task branch.
 
 Reviews and promotions will be done every 2 weeks.
 
-Goodluck!!!!!
+Good luck!!!!!
