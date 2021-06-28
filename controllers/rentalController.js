@@ -5,8 +5,8 @@ const request = require("request");
 const User = require("../models/userModel");
 const Transaction = require("../models/walletTransactionModel");
 const Payment = require("../models/paymentLogModel");
-const { successResponse } = require("../helpers/response");
-const AppError = require("../helpers/appError");
+const { successResponse } = require("../utils/response");
+const AppError = require("../errors/appError");
 const Wallet = require("../models/walletModel");
 
 const { initializePayment, verifyPayment } = require("./paymentController")(

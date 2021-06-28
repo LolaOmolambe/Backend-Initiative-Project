@@ -1,5 +1,5 @@
-const { successResponse } = require("../helpers/response");
-const AppError = require("../helpers/appError");
+const { successResponse } = require("../utils/response");
+const AppError = require("../errors/appError");
 
 exports.createOne = (Model) => async (req, res, next) => {
   try {

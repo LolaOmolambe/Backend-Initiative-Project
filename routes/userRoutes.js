@@ -1,20 +1,22 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
-const schemas = require("../helpers/schemas");
-const middleware = require("../helpers/middleware");
-const authController = require("../controllers/authController");
-const upload = require("../helpers/image-upload");
+const upload = require("../utils/image-upload");
+const authMiddleware = require("../middleware/auth");
+const joiMiddleware = require("../middleware/joiMiddleware");
+const { updateUser } = require("../validators/user");
 
-router.use(authController.protectRoutes);
+router.use(authMiddleware.protectRoutes);
 
+/*Routes to Get, update, delete logged in user */
 router
   .route("/me")
   .get(userController.getUser)
-  .put(upload.single("picture"), userController.updateUser)
+  .put(
+    joiMiddleware(updateUser),
+    upload.single("picture"),
+    userController.updateUser
+  )
   .delete(userController.deleteUser);
 
-router.use(authController.rolesAllowed("admin"));
-
-router.get("/", userController.getAllUsers);
 module.exports = router;

@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const AppError = require("./appError");
+const AppError = require("../errors/appError");
 
 const middleware = (schema, property) => {
   return (req, res, next) => {
@@ -12,12 +12,7 @@ const middleware = (schema, property) => {
       const { details } = error;
       const message = details.map((i) => i.message).join(",");
 
-      return next(new AppError("Invalid request body", 422));
-      // res.status(422).json({
-      //   status: "error",
-      //   message: "Invalid request body",
-      //   error: message,
-      // });
+      return next(new AppError(message, 400));
     }
   };
 };

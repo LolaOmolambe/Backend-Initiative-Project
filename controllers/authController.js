@@ -2,8 +2,8 @@ const User = require("../models/userModel");
 const Wallet = require("../models/walletModel");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { successResponse } = require("../helpers/response");
-const AppError = require("../helpers/appError");
+const { successResponse } = require("../utils/response");
+const AppError = require("../errors/appError");
 
 const assignToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -26,6 +26,11 @@ exports.googleResponse = (user, res) => {
   return successResponse(res, 200, "Login Successfull", { user });
 };
 
+/**
+ * Controller for User Login
+ * @param {*} req.body.email - Email of User
+ * @param {*} req.body.password - Password of User
+ */
 exports.login = async (req, res, next) => {
   try {
     let { email, password } = req.body;
@@ -50,19 +55,24 @@ exports.login = async (req, res, next) => {
   }
 };
 
+/**
+ * Controller to register a user
+ * @param {*} req.body.name - Name of User
+ * @param {*} req.body.email - Email of User
+ * @param {*} req.body.password - Password of User
+ * @param {*} req.body.confirmPassword - Password Confirm of User
+ * @returns
+ */
 exports.signup = async (req, res, next) => {
   try {
-    let { password, confirmPassword } = req.body;
-    if (password != confirmPassword) {
-      return next(new AppError("Password mismatch", 400));
-    }
+    req.body.role = "user";
 
     let user = await User.create(req.body);
 
     //Create Wallet for every user
     let wallet = await Wallet.create({
       balance: 0,
-      user: user._id
+      user: user._id,
     });
 
     //Allow login
@@ -72,6 +82,11 @@ exports.signup = async (req, res, next) => {
   }
 };
 
+/**
+ * Controller for Forgot Password Feature
+ * @param {*} req.body.email - Email of User
+ * @returns
+ */
 exports.forgotPassword = async (req, res, next) => {
   try {
     //Find the User
@@ -93,6 +108,13 @@ exports.forgotPassword = async (req, res, next) => {
   }
 };
 
+/**
+ * Controller to reset password
+ * @param {*} req.body.token - Reset password token
+ * @param {*} req.body.password - New Password
+ * @param {*} req.body.confirmPassword - Confirm password
+ * @returns
+ */
 exports.resetPassword = async (req, res, next) => {
   try {
     let { token, password, confirmPassword } = req.body;
@@ -116,10 +138,6 @@ exports.resetPassword = async (req, res, next) => {
       );
     }
 
-    if (password != confirmPassword) {
-      return next(new AppError("Password mismatch", 400));
-    }
-
     user.password = password;
     user.confirmPassword = confirmPassword;
     user.passwordResetExpires = undefined;
@@ -132,45 +150,4 @@ exports.resetPassword = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
-
-//MiddleWares
-exports.protectRoutes = async (req, res, next) => {
-  try {
-    let token;
-
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
-    }
-
-    if (!token) {
-      return next(new AppError("You are not authenticated. Please login", 401));
-    }
-
-    let decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
-
-    const user = await User.findById(decodedToken.userId);
-
-    if (!user) {
-      return next(new AppError("User does not exist", 401));
-    }
-    req.user = user;
-    next();
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.rolesAllowed = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return next(
-        new AppError("You are not authorized to access this route", 403)
-      );
-    }
-    next();
-  };
 };

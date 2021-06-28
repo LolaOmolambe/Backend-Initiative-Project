@@ -2,19 +2,26 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router();
 const authControllers = require("../controllers/authController");
-const middleware = require("../helpers/middleware");
-const schemas = require("../helpers/schemas");
+const joiMiddleware = require("../middleware/joiMiddleware");
+const { userSignUp, userLogin, resetPassword } = require("../validators/auth");
 
-router.post(
-  "/signup",
-  middleware(schemas.authSignUpModel),
-  authControllers.signup
-);
-router.post("/login", authControllers.login);
+/* User Sign Up */
+router.post("/signup", joiMiddleware(userSignUp), authControllers.signup);
 
+/* User Login */
+router.post("/login", joiMiddleware(userLogin), authControllers.login);
+
+/* Forgot Password */
 router.post("/forgotpassword", authControllers.forgotPassword);
-router.post("/resetPassword", authControllers.resetPassword);
 
+/* Reset Password */
+router.post(
+  "/resetPassword",
+  joiMiddleware(resetPassword),
+  authControllers.resetPassword
+);
+
+/* Google Login */
 router.get(
   "/googlelogin",
   passport.authenticate("google", {

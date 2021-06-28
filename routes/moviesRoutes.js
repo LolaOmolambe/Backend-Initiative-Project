@@ -1,28 +1,34 @@
 const express = require("express");
 const router = express.Router();
 const moviesController = require("../controllers/movieController");
-const authController = require("../controllers/authController");
-const schemas = require("../helpers/schemas");
-const middleware = require("../helpers/middleware");
-const uploadService = require("../helpers/image-upload");
+const uploadService = require("../utils/image-upload");
+const authMiddleware = require("../middleware/auth");
+const joiMiddleware = require("../middleware/joiMiddleware");
+const { addMovie } = require("../validators/movie");
 
-router.use(authController.protectRoutes);
+router.use(authMiddleware.protectRoutes);
 
-router.route("/").get(moviesController.getAllMovies).post(
-  authController.rolesAllowed("admin"),
-  //middleware(schemas.movieModel),
-  uploadService.single("poster"),
-  moviesController.createMovie
-);
+/**Create, Get All Movies */
+router
+  .route("/")
+  .get(moviesController.getAllMovies)
+  .post(
+    authMiddleware.rolesAllowed("admin"),
+    uploadService.single("poster"),
+    joiMiddleware(addMovie),
+    moviesController.createMovie
+  );
 
+/**Get a Movie, Update , Delete A Movie */
 router
   .route("/:id")
   .get(moviesController.getMovie)
   .put(
-    authController.rolesAllowed("admin"),
+    authMiddleware.rolesAllowed("admin"),
     uploadService.single("poster"),
+    joiMiddleware(addMovie),
     moviesController.updateMovie
   )
-  .delete(authController.rolesAllowed("admin"), moviesController.deleteMovie);
+  .delete(authMiddleware.rolesAllowed("admin"), moviesController.deleteMovie);
 
 module.exports = router;

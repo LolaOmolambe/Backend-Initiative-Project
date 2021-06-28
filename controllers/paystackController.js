@@ -2,8 +2,8 @@ const Booking = require("../models/bookingModel");
 const request = require("request");
 const Transaction = require("../models/walletTransactionModel");
 const PaymentLog = require("../models/paymentLogModel");
-const { successResponse } = require("../helpers/response");
-const AppError = require("../helpers/appError");
+const { successResponse } = require("../utils/response");
+const AppError = require("../errors/appError");
 const Wallet = require("../models/walletModel");
 const { verifyPayment } = require("./paymentController")(request);
 

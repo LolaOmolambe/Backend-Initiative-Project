@@ -1,10 +1,15 @@
 const repo = require("./generalRepo");
 const User = require("../models/userModel");
-const { successResponse } = require("../helpers/response");
-const AppError = require("../helpers/appError");
+const { successResponse } = require("../utils/response");
+const AppError = require("../errors/appError");
 
-exports.getAllUsers = repo.getAll(User);
+//exports.getAllUsers = repo.getAll(User);
 
+/**
+ * Controller to get details about a Logged in User
+ * @param {*} req.user._id - Id of Logged in User
+ * @returns
+ */
 exports.getUser = async (req, res, next) => {
   try {
     let user = await User.findById(req.user._id);
@@ -14,6 +19,13 @@ exports.getUser = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * Controller to update user's name and/or profile picture
+ * @param {} req.body.name - Name of User
+ * @param {} req.file.picture - Profile Picture
+ * @returns
+ */
 exports.updateUser = async (req, res, next) => {
   try {
     //Only allow some fields get updated
@@ -39,6 +51,9 @@ exports.updateUser = async (req, res, next) => {
   }
 };
 
+/**
+ * Controller to delete logged in user's account
+ */
 exports.deleteUser = async (req, res, next) => {
   try {
     await User.findByIdAndUpdate(req.user._id, { isDeleted: true });

@@ -1,15 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const rentalController = require("../controllers/rentalController");
-const schemas = require("../helpers/schemas");
-const middleware = require("../helpers/middleware");
-const authController = require("../controllers/authController");
+//const schemas = require("../validators/schemas");
+const joiMiddleware = require("../middleware/joiMiddleware");
+const { bookingModel } = require("../validators/schemas");
 
-router.use(authController.protectRoutes);
+//const middleware = require("../middleware/joiMiddleware");
+const authController = require("../controllers/authController");
+const authMiddleware = require("../middleware/auth");
+
+router.use(authMiddleware.protectRoutes);
 
 router
   .route("/")
-  .post(middleware(schemas.bookingModel),rentalController.createBooking)
+  .post(joiMiddleware(bookingModel), rentalController.createBooking)
   .get(rentalController.getAllUsersBookings);
 
 router
