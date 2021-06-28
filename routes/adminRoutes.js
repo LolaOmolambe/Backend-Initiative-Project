@@ -13,4 +13,7 @@ router.use(authMiddleware.protectRoutes, authMiddleware.rolesAllowed("admin"));
 /** Get All Users */
 router.get("/users", adminController.getAllUsers);
 
+/**Get All Transactions */
+router.get("/transactions", adminController.getAllTransactions);
+
 module.exports = router;

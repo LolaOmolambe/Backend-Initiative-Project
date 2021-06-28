@@ -3,8 +3,6 @@ const User = require("../models/userModel");
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
 
-//exports.getAllUsers = repo.getAll(User);
-
 /**
  * Controller to get details about a Logged in User
  * @param {*} req.user._id - Id of Logged in User

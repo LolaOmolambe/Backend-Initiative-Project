@@ -9,19 +9,30 @@ const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
 const Wallet = require("../models/walletModel");
 
-const { initializePayment, verifyPayment } = require("./paymentController")(
+const { initializePayment, verifyPayment } = require("../utils/paystack")(
   request
 );
 
-
+/*Get All Bookings Done by a User */
 exports.getAllUsersBookings = repo.getAll(Booking);
 
+/* Get a Single Booking for a user */
 exports.getBooking = repo.getOne(Booking);
 
+/* Update Booking for a user */
 exports.updateBooking = repo.updateOne(Booking);
 
+/*Delete Booking for a user */
 exports.deleteBooking = repo.deleteOne(Booking);
 
+/**
+ * Controller to rent a movie
+ * @param {} req.body.movieId - Id of Movie to Rent
+ * @param {} req.body.paymentType - Payment Type can be Wallet, Paystack
+ * @param {} req.body.full_name - Full name (if using Paystack to pay)
+ * @param {} req.body.email - Email  (if using Paystack to pay)
+ * @returns 
+ */
 exports.createBooking = async (req, res, next) => {
   try {
     let movie = await Movie.findById(req.body.movieId);
@@ -37,7 +48,7 @@ exports.createBooking = async (req, res, next) => {
 
       if (wallet.balance < movie.price) {
         return next(
-          new AppError(`Insufficient Wallet Balance, Please fund yout wallet`)
+          new AppError(`Insufficient Wallet Balance, Please fund yout wallet.`)
         );
       }
 

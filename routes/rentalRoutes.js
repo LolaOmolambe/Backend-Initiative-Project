@@ -1,19 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const rentalController = require("../controllers/rentalController");
-//const schemas = require("../validators/schemas");
 const joiMiddleware = require("../middleware/joiMiddleware");
-const { bookingModel } = require("../validators/schemas");
-
-//const middleware = require("../middleware/joiMiddleware");
-const authController = require("../controllers/authController");
+const { addBooking } = require("../validators/rental");
 const authMiddleware = require("../middleware/auth");
 
 router.use(authMiddleware.protectRoutes);
 
+/**Rent a Movie, Get All Users Bookings */
 router
   .route("/")
-  .post(joiMiddleware(bookingModel), rentalController.createBooking)
+  .post(joiMiddleware(addBooking), rentalController.createBooking)
   .get(rentalController.getAllUsersBookings);
 
 router

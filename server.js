@@ -11,9 +11,8 @@ mongoose.connect(process.env.DB, {
 }).then(() => {
     console.log("DB Connection Successful");
 }).catch((err) => {
-    console.log("DB Connection not sucessful");
+    console.log("DB Connection not successful");
 })
-
 
 const PORT = process.env.PORT || 3000;
 

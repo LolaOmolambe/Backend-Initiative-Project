@@ -3,14 +3,20 @@ const Wallet = require("../models/walletModel");
 const Transaction = require("../models/walletTransactionModel");
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
-const QueryHelper = require("../utils/queryHelper");
-const { initializePayment, verifyPayment } = require("./paymentController")(
+const { initializePayment, verifyPayment } = require("../utils/paystack")(
   request
 );
 
+/**
+ * Controller to Fund Customer Wallet
+ * @param {*} req.body.amount - Amount to add to Wallet
+ * @param {*} req.body.email - Email of payee
+ * @param {*} req.body.full_name - Name of payee
+ * @returns 
+ */
 exports.fundWallet = async (req, res, next) => {
   try {
-    console.log(req.user);
+    
     let wallet = await Wallet.findOne({ user: req.user._id });
 
     if (!wallet) {
@@ -18,14 +24,6 @@ exports.fundWallet = async (req, res, next) => {
     }
 
     let user = req.user;
-
-    if (!req.body.amount) {
-      return next(new AppError(`Amount to fund can not be empty`, 400));
-    }
-
-    if (req.body.amount <= 0) {
-      return next(new AppError(`Amount to fund can not be negative`, 400));
-    }
 
     let form = {
       amount: req.body.amount,
@@ -42,7 +40,6 @@ exports.fundWallet = async (req, res, next) => {
         console.log("paystack error ", error);
       }
       response = JSON.parse(body);
-      console.log("response ", response);
       return successResponse(res, 200, "Payment Initiated", { response });
     });
   } catch (err) {
@@ -50,6 +47,11 @@ exports.fundWallet = async (req, res, next) => {
   }
 };
 
+/**
+ * Controller to fetch all transactions done by the logged in user
+ * @param {*} req.user._id - Id of User
+ * @returns 
+ */
 exports.getUserTransactions = async (req, res, next) => {
   try {
     let transactions = await Transaction.find({ user: req.user._id });
@@ -61,28 +63,3 @@ exports.getUserTransactions = async (req, res, next) => {
     next(err);
   }
 };
-
-//For Admin
-exports.getAllTransactions = async (req, res, next) => {
-  try {
-    let filter = {};
-    if (req.params.userId) {
-      filter = { user: req.params.userId };
-    }
-
-    let transactionsQuery = new QueryHelper(Transaction.find(filter), req.query)
-      .sort()
-      .paginate();
-    let transactions = await transactionsQuery.query;
-
-    return successResponse(res, 200, "Transactions fetched successfully", {
-      transactions,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-
-
-

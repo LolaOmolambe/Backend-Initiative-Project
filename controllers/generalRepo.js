@@ -19,7 +19,11 @@ exports.createOne = (Model) => async (req, res, next) => {
 exports.getAll = (Model) => async (req, res, next) => {
   try {
     let result;
-    if (Model.collection.collectionName == "bookings") {
+    if (
+      Model.collection.collectionName == "bookings" &&
+      req.user.role != "admin"
+    ) {
+      console.log("here");
       result = await Model.find({ _userId: req.user._id });
     } else {
       result = await Model.find({});
@@ -34,7 +38,10 @@ exports.getAll = (Model) => async (req, res, next) => {
 exports.getOne = (Model) => async (req, res, next) => {
   try {
     let result;
-    if (Model.collection.collectionName == "bookings") {
+    if (
+      Model.collection.collectionName == "bookings" &&
+      req.user.role != "admin"
+    ) {
       result = await Model.find({
         _id: req.params.id,
         _userId: req.user._id,
@@ -103,7 +110,10 @@ exports.deleteOne = (Model) => async (req, res, next) => {
   try {
     let result;
 
-    if (Model.collection.collectionName == "bookings") {
+    if (
+      Model.collection.collectionName == "bookings" &&
+      req.user.role != "admin"
+    ) {
       result = await Model.findOneAndUpdate(
         {
           _id: req.params.id,

@@ -5,7 +5,7 @@ const PaymentLog = require("../models/paymentLogModel");
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
 const Wallet = require("../models/walletModel");
-const { verifyPayment } = require("./paymentController")(request);
+const { verifyPayment } = require("../utils/paystack")(request);
 
 exports.paystackCallback = async (req, res, next) => {
   try {

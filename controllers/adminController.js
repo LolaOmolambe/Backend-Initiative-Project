@@ -1,8 +1,10 @@
 const repo = require("./generalRepo");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
+const Transaction = require("../models/walletTransactionModel");
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
+const QueryHelper = require("../utils/queryHelper");
 
 const assignToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -55,3 +57,30 @@ exports.adminLogin = async (req, res, next) => {
  * Controller to Get All Users
  */
 exports.getAllUsers = repo.getAll(User);
+
+/**
+ * Controller to fetch all transactions 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+exports.getAllTransactions = async (req, res, next) => {
+  try {
+    let filter = {};
+    if (req.params.userId) {
+      filter = { user: req.params.userId };
+    }
+
+    let transactionsQuery = new QueryHelper(Transaction.find(filter), req.query)
+      .sort()
+      .paginate();
+    let transactions = await transactionsQuery.query;
+
+    return successResponse(res, 200, "Transactions fetched successfully", {
+      transactions,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
