@@ -1,24 +1,33 @@
-# Backend-Initiative-Project
-This is a base repository for the backend initiative project
+## Level Six Task: CACHING AND MESSAGING QUEUES (Redis, RabbitMQ)
 
-Level Five Task: PAYMENT GATEWAY (Paystack, Stripe, Flutterwave, etc)
+Before I proceed, let me say, you deserve a standing ovation for having come this far and for your dedication. 
+Congratulations on getting to L6.
 
-Congratulations on passing the L4 task.
+YOU ARE A SUPERSTAR!💃🏽💃🏽💃🏽💃🏽💃🏽
 
-YOU ARE A ROCKSTAR!💃🏽💃🏽💃🏽💃🏽💃🏽
+### Task
 
-WELCOME TO LEVEL FIVE
+For level 6, we want to make to make our app very fast and also to send notifications to your users.
 
-Your job, this time-around is to ensure users can make payment seamlessly on your platform.
+To do that, you need to implement the following:
+- Learn about and implement caching using any of the caching systems such as redis. You can cache all the get requests or the ones you feel the users would hit often. This will enable requests to be much faster, as they do not need to go all the way to the DB which takes a lot of time.
+- For messages, implement a messaging queue to send notifications to users. This can be via email or sms. Messages may include:
+  - Welcome message
+  - Subscription messages
+  - Expiry notices
+  - Adverts, if subscribed 
+  - Any other useful message you may think of 
 
-Ensure a user pays for his / her movie she is willing to rent.
-Ensure you validate payment
-Create a wallet that keeps track of users balance, movie records, etc.
-Create a transaction model that also keeps track of each money flow into the system i.e referencing the user, movie, payment, etc.
-You may decide to add any other relevant feature and also integrating all payment gateway😜
+### Resources
+- Redis
+  - https://blog.logrocket.com/guide-to-fully-understanding-redis/
+  - https://www.ionos.com/digitalguide/hosting/technical-matters/redis-tutorial/
+- RabbitMQ
+  - https://spring.io/guides/gs/messaging-rabbitmq/
 
-Submission: Publish the APIs with Postman and share this link too, do not forget to include the link to your level five task branch.
+### Submission
+Publish the APIs with Postman and share this link too, do not forget to include the link to your level five task branch.
 
-Reviews and promotions will be done every 2 weeks.
+Reviews and promotions will be done every 2 weeks (Please check the channel or ask the coordinators for more details)
 
 Good luck!!!!!
