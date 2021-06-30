@@ -16,7 +16,7 @@ router.post("/forgotpassword", authControllers.forgotPassword);
 
 /* Reset Password */
 router.post(
-  "/resetPassword",
+  "/resetPassword/:token",
   joiMiddleware(resetPassword),
   authControllers.resetPassword
 );

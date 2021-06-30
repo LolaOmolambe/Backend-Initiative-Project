@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
+const { publishMessage } = require("../utils/emailWorker");
 
 const assignToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -74,7 +75,16 @@ exports.signup = async (req, res, next) => {
       balance: 0,
       user: user._id,
     });
-
+    const emailOptions = {
+      mail: user.email,
+      subject: "Welcome to Movie Rentals",
+      template: `<body>
+      <p>Hi, ${user.name}</p>
+      <p>Welcome, we're glad to have you</p>
+     </body>`,
+    };
+    //Call Rabbitmq to add mail to queue
+    publishMessage(emailOptions);
     //Allow login
     loginResponse(user, res);
   } catch (err) {
@@ -100,6 +110,23 @@ exports.forgotPassword = async (req, res, next) => {
     let resetToken = user.createPasswordToken();
     await user.save({ validateBeforeSave: false });
 
+    const resetURL = `${req.protocol}://${req.get(
+      "host"
+    )}/api/auth/resetPassword/${resetToken}`;
+
+    //Send mail to user to reset password
+    const emailOptions = {
+      mail: user.email,
+      subject: "Password Reset",
+      template: `<body>
+      <p>Hi, ${user.name}</p>
+      <p>Please submit a POST request with your new password and confirm password to this link below to reset your password</p>
+      <p> ${resetURL}</p>
+     </body>`,
+    };
+    //Call Rabbitmq to add mail to queue
+    publishMessage(emailOptions);
+
     return successResponse(res, 200, "Token generated successfully", {
       resetToken,
     });
@@ -110,14 +137,15 @@ exports.forgotPassword = async (req, res, next) => {
 
 /**
  * Controller to reset password
- * @param {*} req.body.token - Reset password token
+ * @param {*} req.params.token - Reset password token
  * @param {*} req.body.password - New Password
  * @param {*} req.body.confirmPassword - Confirm password
  * @returns
  */
 exports.resetPassword = async (req, res, next) => {
   try {
-    let { token, password, confirmPassword } = req.body;
+    let { token } = req.params;
+    let { password, confirmPassword } = req.body;
 
     if (!token) {
       return next(new AppError("Token is empty", 404));

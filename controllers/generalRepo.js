@@ -1,6 +1,13 @@
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
+const { clearKey } = require("../utils/cache");
+const QueryHelper = require("../utils/queryHelper");
 
+/**
+ * Controller to create a record in a Model
+ * @param {*} Model - Mongoose model to query
+ * @returns
+ */
 exports.createOne = (Model) => async (req, res, next) => {
   try {
     let result = await Model.create(req.body);
@@ -9,25 +16,32 @@ exports.createOne = (Model) => async (req, res, next) => {
     //   //throw error
     //   console.log("Failed");
     // }
-
+    clearKey(Model.collection.collectionName);
     return successResponse(res, 200, "Creation successfull", { result });
   } catch (err) {
     next(err);
   }
 };
 
+/**
+ * Controller to get multiple records from a Model
+ * @param {*} Model - Mongoose model to query
+ * @returns
+ */
 exports.getAll = (Model) => async (req, res, next) => {
   try {
-    let result;
+    let filter = {};
     if (
       Model.collection.collectionName == "bookings" &&
       req.user.role != "admin"
     ) {
-      console.log("here");
-      result = await Model.find({ _userId: req.user._id });
-    } else {
-      result = await Model.find({});
+      filter._userId = req.user._id;
     }
+    let resultQuery = new QueryHelper(Model.find(filter), req.query)
+      .filter()
+      .sort()
+      .paginate();
+    let result = await resultQuery.query.cache();
 
     return successResponse(res, 200, "Data fetched sucessfully", { result });
   } catch (err) {
@@ -35,6 +49,11 @@ exports.getAll = (Model) => async (req, res, next) => {
   }
 };
 
+/**
+ * Controller to get a single record from a Model
+ * @param {*} Model - Mongoose model to query
+ * @returns
+ */
 exports.getOne = (Model) => async (req, res, next) => {
   try {
     let result;
@@ -63,6 +82,11 @@ exports.getOne = (Model) => async (req, res, next) => {
   }
 };
 
+/**
+ * Controller to update a record in a Model
+ * @param {*} Model - Mongoose model to query
+ * @returns
+ */
 exports.updateOne = (Model) => async (req, res, next) => {
   try {
     let result;
@@ -106,6 +130,11 @@ exports.updateOne = (Model) => async (req, res, next) => {
   }
 };
 
+/**
+ * Controller to delete a single record from a Model
+ * @param {*} Model - Mongoose model to query
+ * @returns
+ */
 exports.deleteOne = (Model) => async (req, res, next) => {
   try {
     let result;

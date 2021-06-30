@@ -8,10 +8,10 @@ const Payment = require("../models/paymentLogModel");
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
 const Wallet = require("../models/walletModel");
+const { publishMessage } = require("../utils/emailWorker");
 
-const { initializePayment, verifyPayment } = require("../utils/paystack")(
-  request
-);
+const { initializePayment, verifyPayment } =
+  require("../utils/paystack")(request);
 
 /*Get All Bookings Done by a User */
 exports.getAllUsersBookings = repo.getAll(Booking);
@@ -31,7 +31,7 @@ exports.deleteBooking = repo.deleteOne(Booking);
  * @param {} req.body.paymentType - Payment Type can be Wallet, Paystack
  * @param {} req.body.full_name - Full name (if using Paystack to pay)
  * @param {} req.body.email - Email  (if using Paystack to pay)
- * @returns 
+ * @returns
  */
 exports.createBooking = async (req, res, next) => {
   try {
@@ -74,6 +74,20 @@ exports.createBooking = async (req, res, next) => {
         description: "Payment for Rental",
         wallet: wallet._id,
       });
+
+      //Send Mail to Customer For Rental Booking
+      const emailOptions = {
+        mail: user.email,
+        subject: `Thank you for purchasing ${movie.title}`,
+        template: `<body>
+        <p>Hi, ${user.name}</p>
+        <p>Whoop, Your order has been received. Thank you. </p>
+        <p>We hope you enjoy this movie</p>
+        <p>If you need any help with using our app, please don't hesitate to contact us!</p>
+       </body>`,
+      };
+      //Call Rabbitmq to add mail to queue
+      publishMessage(emailOptions);
 
       return successResponse(res, 200, "Payment Successful", { newBooking });
     } else if (req.body.paymentType == "Paystack") {

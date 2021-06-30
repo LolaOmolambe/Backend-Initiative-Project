@@ -35,9 +35,6 @@ const authSchemas = {
     }),
   }),
   resetPassword: Joi.object().keys({
-    token: Joi.string().required().messages({
-      "any.required": "Reset password token is required !",
-    }),
     password: Joi.string().required().min(5).messages({
       "string.min": "Password must contain at least 5 characters !",
       "any.required": "Password is required !",

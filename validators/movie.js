@@ -12,7 +12,7 @@ const movieSchemas = {
     }),
     genre: Joi.string().required().valid("Action", "Comedy", "Drama", "Fantasy", "Horror", "Mystery", "Romance", "Thriller").messages({
       "any.required": "Genre is required !",
-      "string.valid": "Context must be one of ['Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance','Thriller'] !",
+      "string.valid": "Genre must be one of ['Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance','Thriller'] !",
     }),
     poster: Joi.any(),
   }),

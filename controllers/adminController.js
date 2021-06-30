@@ -5,6 +5,7 @@ const Transaction = require("../models/walletTransactionModel");
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
 const QueryHelper = require("../utils/queryHelper");
+const {clearKey} = require("../utils/cache");
 
 const assignToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -59,23 +60,24 @@ exports.adminLogin = async (req, res, next) => {
 exports.getAllUsers = repo.getAll(User);
 
 /**
- * Controller to fetch all transactions 
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * Controller to fetch all transactions  
+ * @param {*} req.query.currentPage - Current Page Number (Pagination)
+ * @param {*} req.query.perPage - Number of records to return 
+ * @param {*} req.query.walletTransactionType - Type of transaction (Credit or Debit)
+ * @param {*} req.query.userId - User Id to query  
  * @returns 
  */
 exports.getAllTransactions = async (req, res, next) => {
   try {
     let filter = {};
-    if (req.params.userId) {
-      filter = { user: req.params.userId };
+    if (req.query.userId) {
+      filter = { user: req.query.userId };
     }
 
     let transactionsQuery = new QueryHelper(Transaction.find(filter), req.query)
       .sort()
       .paginate();
-    let transactions = await transactionsQuery.query;
+    let transactions = await transactionsQuery.query.cache();
 
     return successResponse(res, 200, "Transactions fetched successfully", {
       transactions,

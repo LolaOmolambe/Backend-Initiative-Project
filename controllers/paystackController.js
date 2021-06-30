@@ -5,6 +5,9 @@ const PaymentLog = require("../models/paymentLogModel");
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
 const Wallet = require("../models/walletModel");
+const User = require("../models/userModel");
+const Movie = require("../models/movieModel");
+const { publishMessage } = require("../utils/emailWorker");
 const { verifyPayment } = require("../utils/paystack")(request);
 
 exports.paystackCallback = async (req, res, next) => {
@@ -41,6 +44,24 @@ exports.paystackCallback = async (req, res, next) => {
           gatewayResponse: response.data.gateway_response,
           paymentFor: "Booking",
         });
+
+        //Send Mail to Customer for Booking Payment
+        const user = await User.findById(response.data.metadata.userId);
+        const movie = await Movie.findById(response.data.metadata.movieId);
+
+        const emailOptions = {
+          mail: user.email,
+          subject: `Thank you for purchasing ${movie.title}`,
+          template: `<body>
+        <p>Hi, ${user.name}</p>
+        <p>Whoop, Your order has been received. Thank you. </p>
+        <p>We hope you enjoy this movie</p>
+        <p>If you need any help with using our app, please don't hesitate to contact us!</p>
+       </body>`,
+        };
+
+        //Call Rabbitmq to add mail to queue
+        publishMessage(emailOptions);
 
         return successResponse(res, 200, "Payment Successful", null);
       } else {
@@ -83,6 +104,20 @@ exports.paystackCallback = async (req, res, next) => {
           gatewayResponse: response.data.gateway_response,
           wallet: wallet._id,
         });
+
+        //Send Mail to Customer for Wallet Funding
+        const user = await User.findById(response.data.metadata.userId);
+
+        const emailOptions = {
+          mail: user.email,
+          subject: `Wallet Funding Received`,
+          template: `<body>
+          <p>Hi, ${user.name}</p>
+          <p>Your wallet was funded with ${amountToAdd}. Thank you. </p>
+         </body>`,
+        };
+        //Call Rabbitmq to add mail to queue
+        publishMessage(emailOptions);
 
         return successResponse(res, 200, "Payment Successful", null);
       }

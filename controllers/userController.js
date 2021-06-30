@@ -2,6 +2,8 @@ const repo = require("./generalRepo");
 const User = require("../models/userModel");
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
+const { clearKey } = require("../utils/cache");
+
 
 /**
  * Controller to get details about a Logged in User
@@ -42,7 +44,7 @@ exports.updateUser = async (req, res, next) => {
     if (!user) {
       return next(new AppError("User does not exist", 404));
     }
-
+    clearKey(User.collection.collectionName);
     return successResponse(res, 200, "User updated successfully", { user });
   } catch (err) {
     next(err);

@@ -5,15 +5,19 @@ const morgan = require("morgan");
 const routes = require("./routes/indexRoutes");
 const errorHandler = require("./errors/errorHandler");
 const AppError = require("./errors/appError");
+const seedDB = require("./seed");
 const passport = require("passport");
 require("./utils/passport");
 
+require("./utils/cache");
 const app = express();
 
 // Development logging
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+//Seed Database
+seedDB();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

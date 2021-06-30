@@ -2,6 +2,7 @@ const repo = require("./generalRepo");
 const Movie = require("../models/movieModel");
 const { successResponse } = require("../utils/response");
 const AppError = require("../errors/appError");
+const { clearKey } = require("../utils/cache");
 
 /* Controller to Get All Movies */
 exports.getAllMovies = repo.getAll(Movie);
@@ -42,6 +43,8 @@ exports.createMovie = async (req, res, next) => {
       imageUrl,
     }).save();
 
+    clearKey(Movie.collection.collectionName);
+
     return successResponse(res, 201, "Movie added successfully", {
       createdMovie,
     });
@@ -49,7 +52,6 @@ exports.createMovie = async (req, res, next) => {
     next(err);
   }
 };
-
 
 /**
  * Controller to update a movie
@@ -92,7 +94,7 @@ exports.updateMovie = async (req, res, next) => {
         runValidators: true,
       }
     );
-
+    clearKey(Movie.collection.collectionName);
     return successResponse(res, 200, "Movie updated Successfully", { result });
   } catch (err) {
     next(err);

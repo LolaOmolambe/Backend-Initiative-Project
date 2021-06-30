@@ -6,6 +6,7 @@ const AppError = require("../errors/appError");
 const { initializePayment, verifyPayment } = require("../utils/paystack")(
   request
 );
+const QueryHelper = require("../utils/queryHelper");
 
 /**
  * Controller to Fund Customer Wallet
@@ -50,11 +51,19 @@ exports.fundWallet = async (req, res, next) => {
 /**
  * Controller to fetch all transactions done by the logged in user
  * @param {*} req.user._id - Id of User
+ * @param {*} req.query.currentPage - Current Page Number (Pagination)
+ * @param {*} req.query.perPage - Number of records to return 
+ * @param {*} req.query.walletTransactionType - Type of transaction (Credit or Debit)
  * @returns 
  */
 exports.getUserTransactions = async (req, res, next) => {
   try {
-    let transactions = await Transaction.find({ user: req.user._id });
+
+    let filter = {user: req.user._id};
+
+    let transactionsQuery = new QueryHelper(Transaction.find(filter), req.query).filter().sort().paginate()
+
+    let transactions = await transactionsQuery.query.cache();
 
     return successResponse(res, 200, "Transactions fetched sucessfully", {
       transactions,
